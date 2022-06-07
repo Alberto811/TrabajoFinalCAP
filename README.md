@@ -1,0 +1,3 @@
+# TrabajoFinalCAP
+
+kmeans.c (SECUENCIALIZADA)
