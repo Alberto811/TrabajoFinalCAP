@@ -12,6 +12,8 @@ float *centroidesGlobal;
 float *puntosClusterGlobal;
 float deltaGlobal = ERROR + 1;
 double deltaActual;
+
+
 void leerDatos(const char *nombreArchivo, int *N, float **puntos) {
 	FILE *fptr = fopen(nombreArchivo, "r");
 
@@ -26,37 +28,13 @@ void leerDatos(const char *nombreArchivo, int *N, float **puntos) {
 	fclose(fptr);
 }
 
-void escribirArchivoClusters(const char *nombreArchivo, int N, float *puntosCluster) {
-	FILE *fptr = fopen(nombreArchivo, "w");
-
-	for (int i = 0; i < N; i++) {
-		fprintf(fptr, "%f %f %f %f\n", *(puntosCluster + (i * 4)), *(puntosCluster + (i * 4) + 1), *(puntosCluster + (i * 4) + 2), *(puntosCluster + (i * 4) + 3));
-	}
-
-	fclose(fptr);
-}
-
-void escribirArchivoCentroides(const char *nombreArchivo, int K, int iteraciones, float *centroides) {
-	FILE *fptr = fopen(nombreArchivo, "w");
-
-	for (int i = 0; i < iteraciones; i++) {
-		for (int j = 0; j < K; j++) {
-			fprintf(fptr, "%f %f %f, ", *(centroides + (i * K) + (j * 3)), *(centroides + (i * K) + (j * 3) + 1), *(centroides + (i * K) + (j * 3) + 2));
-		}
-		fprintf(fptr, "\n");
-	}
-
-	fclose(fptr);
-}
-
-
 
 double calcularDistanciaEuclidiana(float *puntoA, float *puntoB) {
   // calcular la distancia euclidiana
   return sqrt(pow(((double)(*(puntoB + 0)) - (double)(*(puntoA + 0))), 2) + pow(((double)(*(puntoB + 1)) - (double)(*(puntoA + 1))), 2) + pow(((double)(*(puntoB + 2)) - (double)(*(puntoA + 2))), 2));
 }
 
-void ejecucionAlgoritmo(int N, int K, int nHilos, float *puntos, float **puntosCluster, float **centroides, int *iteraciones) {
+void ejecucionAlgoritmo(int N, int K, float *puntos, float **puntosCluster, float **centroides, int *iteraciones) {
 
   double minimaDistancia, distanciaActual;
   //se usa para guardar el id del cluster al que pertenece cada punto en cada momento
@@ -131,7 +109,7 @@ void ejecucionAlgoritmo(int N, int K, int nHilos, float *puntos, float **puntosC
   }
 }
 
-void kMeans(int N, int K, int nHilos, float *puntos, float **puntosCluster, float **centroides, int *iteraciones) {
+void kMeans(int N, int K, float *puntos, float **puntosCluster, float **centroides, int *iteraciones) {
   *puntosCluster = (float *)malloc(sizeof(float) * N * 4);
   puntosClusterGlobal = *puntosCluster;
 
@@ -143,7 +121,7 @@ void kMeans(int N, int K, int nHilos, float *puntos, float **puntosCluster, floa
     centroidesGlobal[(i * 3) + 2] = puntos[(i * 3) + 2];
   }
   //Ejecutamos todala la lógica del algoritmo
-  ejecucionAlgoritmo(N, K, nHilos, puntos, puntosCluster, centroides, iteraciones);
+  ejecucionAlgoritmo(N, K, puntos, puntosCluster, centroides, iteraciones);
 
   int tamanioCentroides = (*iteraciones + 1) * K * 3;
   *centroides = (float *)calloc(tamanioCentroides, sizeof(float));
@@ -163,9 +141,6 @@ int main(int argc, char const *argv[]) {
 
 	const char *conjuntoDatos = argv[1];
 	const int K = atoi(argv[2]);
-	const int nHilos = 1;
-	const char *archivoPuntosCluster = argv[4];
-	const char *archivoCentroides = argv[5];
 
 	//total de puntos de datos
   int N;
@@ -181,13 +156,10 @@ int main(int argc, char const *argv[]) {
 	leerDatos(conjuntoDatos, &N, &puntos);
 
 	clock_t tiempoInicial = clock();
-	kMeans(N, K, nHilos, puntos, &puntosCluster, &centroides, &iteraciones);
+	kMeans(N, K, puntos, &puntosCluster, &centroides, &iteraciones);
 	clock_t tiempoFinal = clock();
 
 	printf("Tiempo total: %lfs\n", (double) (tiempoFinal - tiempoInicial) / CLOCKS_PER_SEC);
-
-	escribirArchivoClusters(archivoPuntosCluster, N, puntosCluster);
-	escribirArchivoCentroides(archivoCentroides, K, iteraciones, centroides);
 
 	return 0;
 }

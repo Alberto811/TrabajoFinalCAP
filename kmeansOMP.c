@@ -26,31 +26,6 @@ void leerDatos(const char *nombreArchivo, int *N, float **puntos) {
 	fclose(fptr);
 }
 
-void escribirArchivoClusters(const char *nombreArchivo, int N, float *puntosCluster) {
-	FILE *fptr = fopen(nombreArchivo, "w");
-
-	for (int i = 0; i < N; i++) {
-		fprintf(fptr, "%f %f %f %f\n", *(puntosCluster + (i * 4)), *(puntosCluster + (i * 4) + 1), *(puntosCluster + (i * 4) + 2), *(puntosCluster + (i * 4) + 3));
-	}
-
-	fclose(fptr);
-}
-
-void escribirArchivoCentroides(const char *nombreArchivo, int K, int iteraciones, float *centroides) {
-	FILE *fptr = fopen(nombreArchivo, "w");
-
-	for (int i = 0; i < iteraciones; i++) {
-		for (int j = 0; j < K; j++) {
-			fprintf(fptr, "%f %f %f, ", *(centroides + (i * K) + (j * 3)), *(centroides + (i * K) + (j * 3) + 1), *(centroides + (i * K) + (j * 3) + 2));
-		}
-		fprintf(fptr, "\n");
-	}
-
-	fclose(fptr);
-}
-
-
-
 double calcularDistanciaEuclidiana(float *puntoA, float *puntoB) {
   // calcular la distancia euclidiana
   return sqrt(pow(((double)(*(puntoB + 0)) - (double)(*(puntoA + 0))), 2) + pow(((double)(*(puntoB + 1)) - (double)(*(puntoA + 1))), 2) + pow(((double)(*(puntoB + 2)) - (double)(*(puntoA + 2))), 2));
@@ -191,8 +166,6 @@ int main(int argc, char const *argv[]) {
 	const char *conjuntoDatos = argv[1];
 	const int K = atoi(argv[2]);
 	const int nHilos = atoi(argv[3]);
-	const char *archivoPuntosCluster = argv[4];
-	const char *archivoCentroides = argv[5];
 
 	//total de puntos de datos
   int N;
@@ -212,9 +185,6 @@ int main(int argc, char const *argv[]) {
 	double tiempoFinal = omp_get_wtime();
 
 	printf("Tiempo total: %lfs\n", tiempoFinal - tiempoInicial);
-
-	escribirArchivoClusters(archivoPuntosCluster, N, puntosCluster);
-	escribirArchivoCentroides(archivoCentroides, K, iteraciones, centroides);
 
 	return 0;
 }
